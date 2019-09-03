@@ -15,12 +15,12 @@ module.exports = (env = {}) => {
                 use: [{
                     loader: 'babel-loader',
                     options: {
-                        presets: ['es2015', 'stage-2', 'react']
+                        presets: ['env', 'stage-2', 'react']
                     }
                 }]
             },{
                 test: /\.css$/,
-                loader: 'style-loader!css-loader?modules&camelCase'
+                loader: 'style-loader!css-loader?modules&localsConvention=camelCase'
             },{
                 test: /\.html$/,
                 loader: 'file-loader?name=[path][name].[ext]!extract-loader!html-loader'
@@ -32,7 +32,7 @@ module.exports = (env = {}) => {
                 options: {
                     postcss: [
                         require('stylelint'),
-                        require('autoprefixer')({ browsers: ['defaults'] })
+                        require('autoprefixer')(/*{ browsers: ['defaults'] }*/)
                     ]
                 }
             }),

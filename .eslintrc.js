@@ -7,31 +7,25 @@ module.exports = {
     },
     "globals": {
         "sinon": true,
-        "should": true,
-        "API_DEFAULT_URL": true,
-        "USE_FAKE_SERVER": true
+        "should": true
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended",
-        "plugin:no-unused-vars-rest/recommended"
+        "plugin:react/recommended"
     ],
     "parserOptions": {
-        "ecmaFeatures": {
-            "experimentalObjectRestSpread": true,
-            "jsx": true
-        },
+        "ecmaVersion": 2018,
         "sourceType": "module"
     },
     "plugins": [
-        "react",
-        "no-unused-vars-rest"
+        "react"
     ],
+    "settings": {
+        "react": {
+            "version": "16.0", // React version, default to the latest React stable release
+        }
+    },
     "rules": {
-        "indent": [
-            "warn",
-            4, {"SwitchCase": 1}
-        ],
         "quotes": [
             "warn",
             "single"
@@ -54,6 +48,7 @@ module.exports = {
             "1tbs"
         ],
         "no-console": 0,
+        "no-unused-vars": ["error", {"vars": "all", "args": "after-used", "ignoreRestSiblings": true}],
         "react/display-name": 0,
         "react/prop-types": 0
     }
