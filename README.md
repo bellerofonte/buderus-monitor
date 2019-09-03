@@ -69,7 +69,7 @@ Just use 'Add to main screen' option (or smth like that).
 
 Here is how it should look like on a smartphone
 
-![screenshot_webui.jpeg](./screenshot_webui.jpeg)
+<img src="./screenshot_webui.jpeg" width="295" height="464" />
 
 #### Building from sources
 
