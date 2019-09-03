@@ -1,0 +1,22 @@
+@import url(https://use.fontawesome.com/releases/v5.9.0/css/all.css);
+
+:root{
+    --bmx-max-width: 60vh;
+    --bmx-icon-size: 20vh;
+    --bmx-font-size: 4vh;
+    --bmx-button-count: 2;
+    --bmx-pad-v: 2vh;
+    --bmx-pad-h: 1.5vh;
+}
+
+html,
+body,
+:global(#root) {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: var(--bmx-font-size);
+    font-weight: 300;
+    color: #383838;
+    background: #fff;
+    margin: 0;
+    cursor: default;
+}

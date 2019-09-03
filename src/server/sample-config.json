@@ -1,0 +1,12 @@
+{
+    "portName": "/dev/ttyS0",
+    "web": {
+        "allowedIP": ["10.10.1.0/24", "192.168.1.0/24", "127.0.0.1", "::1"],
+        "port": 8080
+    },
+    "telegram": {
+        "apikey": "your_telegram_bot_api_key",
+        "proxy": "proxy_settings",
+        "phones": [123456789, 234567890]
+    }
+}

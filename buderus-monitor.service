@@ -1,0 +1,17 @@
+[Unit]
+Description=Buderus Monitor
+After=network.target auditd.service
+
+[Service]
+WorkingDirectory=/opt/buderus-monitor
+Environment=NTBA_FIX_319=1
+ExecStart=/usr/local/bin/nodejs index.js
+ExecStop=/bin/kill -HUP $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+RestartPreventExitStatus=255
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

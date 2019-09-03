@@ -1,0 +1,13 @@
+{
+    "name": "buderus-monitor",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "serialport": "^7.1.5",
+        "axios": "^0.19.0",
+        "events": "^3.0.0",
+        "express": "^4.17.1",
+        "express-ipfilter": "^1.0.1",
+        "node-telegram-bot-api": "^0.30.0"
+    }
+}

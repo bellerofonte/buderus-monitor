@@ -1,0 +1,53 @@
+.list-item {
+    display: grid;
+    grid-template-columns: 1fr repeat(2, auto);
+    grid-template-rows: repeat(2, auto);
+    grid-template-areas:
+        'title real set set am'
+        'title real holiday summer day';
+    align-items: center;
+    grid-gap: calc(0.3 * var(--bmx-pad-h))
+}
+
+.list-item-title {
+    margin-left: calc(0.3 * var(--bmx-pad-h));
+    grid-area: title;
+    vertical-align: center;
+}
+
+.list-item-real {
+    margin: 0 calc(0.7 * var(--bmx-pad-h));
+    grid-area: real;
+    font-weight: bolder;
+    vertical-align: center;
+}
+
+.list-item-small {
+    font-size: 50%;
+    color: #666;
+}
+
+.list-item-set {
+    composes: list-item-small;
+    grid-area: set;
+}
+
+.list-item-auto {
+    composes: list-item-small;
+    grid-area: am;
+}
+
+.list-item-day {
+    composes: list-item-small;
+    grid-area: day;
+}
+
+.list-item-summer {
+    composes: list-item-small;
+    grid-area: summer;
+}
+
+.list-item-vacation {
+    composes: list-item-small;
+    grid-area: holiday;
+}
