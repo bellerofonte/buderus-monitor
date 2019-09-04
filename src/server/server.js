@@ -1,10 +1,3 @@
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-const DEBUG = process.env.DEBUG;
-const TelegramBot = require('node-telegram-bot-api');
-const Mec2Port = require(DEBUG === '1' ? './fake-port' : './mec2-port');
-const Express = require('express');
-const {IpFilter, IpDeniedError} = require('express-ipfilter');
-
 function _splitByNum(num, iterable) {
     let arr = [];
     for (let i = 0, j = iterable.length; i < j; i += num) {
@@ -18,23 +11,26 @@ function _forceExit(err) {
     process.exit(1);
 }
 
-const HistoryInterval = 600000; // 10 minutes in milliseconds
-
 module.exports = class {
     constructor() {
         this.state = {};
         this.hasError = false;
-        this.history = [];
     }
 
     run(config) {
         process.on('uncaughtException', err => {
             console.log('Caught exception: ' + err);
         });
-        this._runMecPort(config)
+        this._checkConfig(config)
             .then(() => this._runWebServer(config))
             .then(() => this._runTelegramBot(config))
+            .then(() => this._runHistoryDB(config))
+            .then(() => this._runMecPort(config))
             .catch(err => _forceExit(err));
+    }
+
+    _checkConfig(config) {
+        return config ? Promise.resolve() : Promise.reject('Error: empty config');
     }
 
     _runMecPort(config) {
@@ -42,6 +38,8 @@ module.exports = class {
         if (!portName) {
             return Promise.reject('MEC2 port: port name is invalid');
         }
+        const DEBUG = process.env.DEBUG;
+        const Mec2Port = require(DEBUG === '1' ? './fake-port' : './mec2-port');
         this.port = new Mec2Port(portName);
         this.port.on('data', value => {
             const hadError = this.hasError;
@@ -50,6 +48,7 @@ module.exports = class {
             if (this.hasError && !hadError) {
                 this._sendWarning();
             }
+            this.db && this.db.write(value);
         });
         return this.port.open();
     }
@@ -62,6 +61,9 @@ module.exports = class {
                 return Promise.reject('Web server: port is invalid');
             }
             // create and run web-server
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+            const Express = require('express');
+            const {IpFilter, IpDeniedError} = require('express-ipfilter');
             this.express = Express();
             if (allowedIP) {
                 // Whitelist the following IPs
@@ -76,14 +78,14 @@ module.exports = class {
             }
             this.express.listen(port);
             this.express.get('/state', (req, res) => this._sendStatusWeb(res));
-            this.express.get('/history', (req, res) => this._sendHistoryWeb(res));
+            this.express.get('/history', (req, res) => this._sendHistoryWeb(req, res));
             this.express.get('/', (req, res) => res.sendFile(__dirname + '/client/index.html'));
             this.express.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/client/manifest.json'));
             this.express.get('/index.js', (req, res) => res.sendFile(__dirname + '/client/index.js'));
             this.express.get('/*.(ico|png)', (req, res) => res.sendFile(__dirname + '/client/icons' + req.url));
         }
         console.log(`Web server: ${this.express ? 'on' : 'off'}`);
-        return Promise.resolve('OK');
+        return Promise.resolve();
     }
 
     _runTelegramBot(config) {
@@ -97,6 +99,7 @@ module.exports = class {
             if (!phones || !Array.isArray(phones) || phones.length === 0) {
                 return Promise.reject('Telegram bot: no phones');
             }
+            const TelegramBot = require('node-telegram-bot-api');
             const opts =  proxy ? {baseApiUrl: proxy} : {};
             this.phones = phones;
             this.bot = new TelegramBot(apikey, {polling: true, filepath: true, ...opts});
@@ -114,7 +117,19 @@ module.exports = class {
             };
         }
         console.log(`Telegram bot: ${this.bot ? 'on' : 'off'}`);
-        return Promise.resolve('OK');
+        return Promise.resolve();
+    }
+
+    _runHistoryDB(config) {
+        const {db} = config;
+        if (db) {
+            const HistoryDB = require('./history-db');
+            this.db = new HistoryDB(db);
+            return this.db.run()
+                .then(() => console.log('Database: on'));
+        }
+        console.log('Database: off');
+        return Promise.resolve();
     }
 
     _sendWarning() {
@@ -162,7 +177,7 @@ module.exports = class {
         }
         Object.keys(zones).forEach(key => {
             const {tempReal, tempSet, day, summer, auto, vacation} = zones[key];
-            lines.push(`*${key}: ${tempReal}°C*/${tempSet}°C ${auto ? 'auto' : ''} ${day ? '\☀\u{fe0f}' : '🌙\u{fe0f}'}${summer ? '⛱\u{fe0f}' : ''}${vacation ? ' ✈\u{fe0f}' : ''} `);
+            lines.push(`*${key}: ${tempReal}°C*/${tempSet}°C ${auto ? 'auto' : ''} ${day ? '☀\u{fe0f}' : '🌙\u{fe0f}'}${summer ? '⛱\u{fe0f}' : ''}${vacation ? ' ✈\u{fe0f}' : ''} `);
         });
         if (Error) {
             Error.forEach(e => lines.push(`🆘\u{fe0f}${e}`));
@@ -175,20 +190,12 @@ module.exports = class {
         return res.send(this.state);
     }
 
-    _sendHistoryWeb(res) {
-        return res.send(this.history);
-    }
-    
-    _getHistoryItem() {
-        const time = Math.floor(Date.now() / HistoryInterval);
-        if (this.history.length > 0) {
-            const item = this.history[this.history.length - 1];
-            if (time === item.time) {
-                return item;
-            }
+    _sendHistoryWeb(req, res) {
+        if (this.db) {
+            return this.db.read(req.query.period)
+                .then(val => res.send(val || 'No data to show'))
+                .catch(err => res.status(500).send({message: err.message || 'Invalid request'}));
         }
-        const item = { time };
-        this.history.push(item);
-        return item;
+        return res.send('Database is currently off');
     }
 };

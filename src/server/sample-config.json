@@ -8,5 +8,10 @@
         "apikey": "your_telegram_bot_api_key",
         "proxy": "proxy_settings",
         "phones": [123456789, 234567890]
+    },
+    "db": {
+        "filename": "./history.db",
+        "fields": ["outdoor", "water", "zone1", "zone2"],
+        "interval": 600000
     }
 }
