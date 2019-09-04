@@ -26,6 +26,11 @@ First, download release zip archive and extract it's files anywhere on your Rasp
 ```
 npm install
 ```
+Rename and edit config file
+```
+mv sample-config.json config.json
+nano config.json
+```
 Done!
 
 #### Configuring
