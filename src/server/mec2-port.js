@@ -19,7 +19,7 @@ module.exports = class extends EventEmitter {
 
         // Handle error event
         port.on('error', err => {
-            console.log('Error: ', err.message)
+            console.log('Error: ', err.message);
         });
 
         // Switches the port into "flowing mode"

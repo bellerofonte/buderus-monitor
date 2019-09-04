@@ -105,7 +105,6 @@ module.exports = class {
         return new Promise((resolve, reject) => {
             const fields = this.fields.map(f => f + ' FLOAT').join(', ');
             const sql = `CREATE TABLE IF NOT EXISTS ${this.table} (time UNSIGNED BIG INT PRIMARY KEY, ${fields})`;
-            console.log(`table: ${sql}`);
             this.db.run(sql, err => (err ? reject(err) : resolve()));
         });
     }
@@ -114,7 +113,6 @@ module.exports = class {
         return new Promise((resolve, reject) => {
             const fields = this.fields.map(() => '?').join(', ');
             const sql = `INSERT INTO ${this.table} VALUES (?, ${fields})`;
-            console.log(`write: ${sql}`);
             this.writeStmt = this.db.prepare(sql, err => (err ? reject(err) : resolve()));
         });
     }
@@ -123,9 +121,7 @@ module.exports = class {
         return new Promise((resolve, reject) => {
             const fields = this.fields.join(', ');
             const sql = `SELECT time, ${fields} FROM ${this.table} WHERE time > ? AND time % ? == ? ORDER BY time`;
-            console.log(`read: ${sql}`);
-            this.readStmt =
-                this.db.prepare(sql, err => (err ? reject(err) : resolve()));
+            this.readStmt = this.db.prepare(sql, err => (err ? reject(err) : resolve()));
         });
     }
 };
