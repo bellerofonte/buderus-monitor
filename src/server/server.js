@@ -50,7 +50,7 @@ module.exports = class {
             }
             this.db && this.db.write(value);
         });
-        return this.port.open();
+        return this.port.open().then(() => console.log('MEC2 port: on'));
     }
 
     _runWebServer(config) {

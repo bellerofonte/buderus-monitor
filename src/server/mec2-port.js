@@ -22,11 +22,6 @@ module.exports = class extends EventEmitter {
             console.log('Error: ', err.message)
         });
 
-        // The open event is always emitted
-        port.on('open', () => {
-            console.log('opened');
-        });
-
         // Switches the port into "flowing mode"
         port.on('data', data => {
             this.handleData(data);
@@ -43,15 +38,7 @@ module.exports = class extends EventEmitter {
 
     open() {
         return new Promise((resolve, reject) => {
-            console.log('trying to open port');
-            this.port.open(err => {
-                if (err) {
-                    console.log('Error opening port: ', err.message);
-                    reject(err);
-                }
-                console.log('Port successfully opened');
-                resolve();
-            });
+            this.port.open(err => (err ? reject(err) : resolve()));
         });
     }
 
