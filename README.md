@@ -39,6 +39,10 @@ The `config.json` provides all required settings as a JSON object:
     * `apikey` is obviously your Telergam bot's API key. [More info](https://core.telegram.org/bots)
     * `proxy` is an address or HTTP/HTTPS proxy server. Use it only if Telegram bots are blocked in your country. This overrides `baseApiUrl` bot option.
     * `phones` is an array or allowed Telegram IDs (not phone numbers).
+* The `db` field describes how to save history to SQLite database
+    * `filename` is database file name. Find more info on [SQLite's website](https://www.sqlite.org/index.html)
+    * `fields` is an array containing fields (i.e. columns) whose will be stored in DB in exactly same order. Acceptable values are: `outdoor`, `water` and `zone{N}`.
+    * `interval` is a millisecond period for DB writes. Default is `600000 (10 minutes)` i.e. a new row will be written to DB every 10 minutes.
 
 The only required field is `portName`. Every other field is optional.
 

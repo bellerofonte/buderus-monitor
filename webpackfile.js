@@ -48,9 +48,9 @@ module.exports = (env = {}) => {
                 {from:'manifest.json',to:'manifest.json'}
             ]),
             // copy server files
-            // do not copy 'config.json'
+            // do not copy 'config.json' and SQLite databases
             new CopyWebpackPlugin([
-                {ignore:['config.json'],from:'../server/',to:'../'}
+                {ignore:['config.json', '*.db'],from:'../server/',to:'../'}
             ]),
             // copy server-side package.json file to server folder
             new CopyWebpackPlugin([
