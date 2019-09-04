@@ -26,7 +26,6 @@
         "postcss-loader": "^3.0.0",
         "react": "^16.8.1",
         "react-dom": "^16.8.1",
-        "recharts": "^1.4.2",
         "react-hot-loader": "^4.6.5",
         "regexp-replace-loader": "^1.0.1",
         "should": "^11.2.1",

@@ -64,9 +64,6 @@ export default class extends React.Component {
                                 : 'Refresh'
                             }
                         </a>
-                        <a>
-                            Chart
-                        </a>
                     </div>
                 </div>
             </div>
