@@ -197,4 +197,16 @@ module.exports = class extends EventEmitter {
     assignState(name, value) {
         this.state[name] = Object.assign(this.state[name] || {}, value);
     }
+
+    static checkSum(bytes) {
+        let res = 0x00;
+        for (let n = 0; n < 8; ++n) {
+            let b = bytes[n];
+            for (let i = 0; i < n; ++i) {
+                b = (b < 0x80) ? (b << 1) : (((b & 0x7f) << 1) ^ 0x19);
+            }
+            res = res ^ b;  // and XOR the result with previous checkSum value
+        }
+        return res;
+    }
 };
