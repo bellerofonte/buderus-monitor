@@ -46,7 +46,7 @@ The `config.json` provides all required settings as a JSON object:
     * `phones` is an array or allowed Telegram IDs (not phone numbers).
 * The `db` field describes how to save history to SQLite database
     * `filename` is database file name. Find more info on [SQLite's website](https://www.sqlite.org/index.html)
-    * `fields` is an array containing fields (i.e. columns) whose will be stored in DB in exactly same order. Acceptable values are: `outdoor`, `water` and `zone{N}`.
+    * `fields` is an array containing fields (i.e. columns) whose will be stored in DB in exactly same order. Acceptable values are: `outdoor`, `water` and `zone{1..N}`.
     * `interval` is a millisecond period for DB writes. Default is `600000 (10 minutes)` i.e. a new row will be written to DB every 10 minutes.
 
 The only required field is `portName`. Every other field is optional.
