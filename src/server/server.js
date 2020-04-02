@@ -11,6 +11,12 @@ function _forceExit(err) {
     process.exit(1);
 }
 
+function wait(ms) {
+    return new Promise(resolve => {
+       setTimeout(resolve, ms);
+    });
+}
+
 module.exports = class {
     constructor() {
         this.state = {};
@@ -104,6 +110,8 @@ module.exports = class {
             this.phones = phones;
             this.bot = new TelegramBot(apikey, {polling: true, filepath: true, ...opts});
             this.bot.on('message', msg => this._handleBotMessage(msg.chat.id, msg.text));
+            this.bot.on('error', error => this._handleBotError(error));
+            this.bot.on('polling_error', error => this._handleBotError(error));
             // setup Telegram command handlers
             this.handlers = {
                 'Status': (phone) => this._sendStatusBot(phone)
@@ -144,12 +152,19 @@ module.exports = class {
         if (!phone) return;
         if (this.phones.includes(phone)) {
             this._processHandler(phone, command) || this._processUnknown(phone);
-        }
-        else {
+        } else {
             console.log(`Unauthorized access from phone '${phone}'`);
             this.bot.sendMessage(phone, 'You shall not pass!')
                 .catch(err => console.log(err));
         }
+    }
+
+    _handleBotError(error) {
+        console.log(error);                         // => 'EFATAL'
+        this.bot.stopPolling()                      // stop polling on error
+            .then(() => wait(3000))                 // wait 3 seconds
+            .then(() => this.bot.startPolling())    // restart polling
+            .catch(e => console.log(e));            // log error if failed
     }
 
     _processHandler(phone, command) {
