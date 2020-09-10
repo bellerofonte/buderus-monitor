@@ -39,13 +39,13 @@
         "webpack-dev-server": "^3.8.0"
     },
     "dependencies": {
-        "serialport": "^7.1.5",
-        "axios": "^0.19.0",
-        "events": "^3.0.0",
+        "serialport": "^9.0.1",
+        "axios": "^0.20.0",
+        "events": "^3.2.0",
         "express": "^4.17.1",
-        "express-ipfilter": "^1.0.1",
-        "moment": "^2.24.0",
-        "node-telegram-bot-api": "^0.30.0",
-        "sqlite3": "^4.1.0"
+        "express-ipfilter": "^1.1.2",
+        "moment": "^2.27.0",
+        "node-telegram-bot-api": "^0.50.0",
+        "sqlite3": "^5.0.0"
     }
 }
