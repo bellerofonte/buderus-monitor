@@ -105,13 +105,20 @@ module.exports = class {
             if (!phones || !Array.isArray(phones) || phones.length === 0) {
                 return Promise.reject('Telegram bot: no phones');
             }
-            const TelegramBot = require('node-telegram-bot-api');
-            const opts =  proxy ? {baseApiUrl: proxy} : {};
             this.phones = phones;
-            this.bot = new TelegramBot(apikey, {polling: true, filepath: true, ...opts});
+            const TelegramBot = require('node-telegram-bot-api');
+            const options = {
+                polling: true,
+                filepath: true,
+                params: {timeout: 30}
+            };
+            if (proxy) {
+                options.baseApiUrl = proxy;
+            }
+            this.bot = new TelegramBot(apikey, options);
             this.bot.on('message', msg => this._handleBotMessage(msg.chat.id, msg.text));
-            this.bot.on('error', error => this._handleBotError(error));
-            this.bot.on('polling_error', error => this._handleBotError(error));
+            this.bot.on('error', error => this._handleBotError('error', error));
+            this.bot.on('polling_error', error => this._handleBotError('polling_error', error));
             // setup Telegram command handlers
             this.handlers = {
                 'Status': (phone) => this._sendStatusBot(phone)
@@ -123,6 +130,8 @@ module.exports = class {
                     keyboard: _splitByNum(3, Object.keys(this.handlers))
                 }
             };
+            this.botWdtTimeout = (telegram.max_timeout || 30) * 1000;
+            this._startBotWdt();
         }
         console.log(`Telegram bot: ${this.bot ? 'on' : 'off'}`);
         return Promise.resolve();
@@ -159,12 +168,49 @@ module.exports = class {
         }
     }
 
-    _handleBotError(error) {
-        console.log(error);                         // => 'EFATAL'
-        this.bot.stopPolling()                      // stop polling on error
-            .then(() => wait(3000))                 // wait 3 seconds
-            .then(() => this.bot.startPolling())    // restart polling
-            .catch(e => console.log(e));            // log error if failed
+    _botWdtCallback() {
+        const last = this.bot._polling._lastUpdate;
+        const now = (new Date()).getTime();
+        if ((last > 0) && (now > (last + this.botWdtTimeout))) {
+            console.log('Telegram bot WDT triggered. Trying to restart bot...');
+            this._restartBot();
+        }
+    }
+
+    _startBotWdt() {
+        this.botWdt = setInterval(() => this._botWdtCallback(), 5000);
+        return Promise.resolve();
+    }
+
+    _stopBotWdt() {
+        if (this.botWdt) {
+            clearTimeout(this.botWdt);
+            this.botWdt = null;
+        }
+        return Promise.resolve();
+    }
+
+    _restartBot() {
+        this.bot.stopPolling()                              // stop polling on error
+            .then(() => {
+                console.log('Telegram bot stopped');
+                return this._stopBotWdt();
+            })
+            .then(() => wait(3000))                         // wait 3 seconds
+            .then(() => {
+                console.log('Trying to restart Telegram bot');
+                this.bot.startPolling({restart: true});     // restart polling
+            })
+            .then(() => {
+                console.log('Telegram bot restarted successfully');
+                return this._startBotWdt();
+            })
+            .catch(e => console.log(e));                    // log error if failed
+    }
+
+    _handleBotError(src, error) {
+        console.log(`TelegramBot stopped due to ${src}: ${error}`);
+        this._restartBot();
     }
 
     _processHandler(phone, command) {
@@ -192,7 +238,7 @@ module.exports = class {
         }
         Object.keys(zones).forEach(key => {
             const {tempReal, tempSet, day, summer, auto, vacation} = zones[key];
-            lines.push(`*${key}: ${tempReal}°C*/${tempSet}°C ${auto ? 'auto' : ''} ${day ? '☀\u{fe0f}' : '🌙\u{fe0f}'}${summer ? '⛱\u{fe0f}' : ''}${vacation ? ' ✈\u{fe0f}' : ''} `);
+            lines.push(`*${key}: ${tempReal}°C*/${tempSet}°C ${auto ? '\u{1F916}\u{fe0f}' : ''} ${day ? '☀\u{fe0f}' : '🌙\u{fe0f}'}${summer ? '⛱\u{fe0f}' : ''}${vacation ? ' ✈\u{fe0f}' : ''} `);
         });
         if (Error) {
             Error.forEach(e => lines.push(`🆘\u{fe0f}${e}`));
