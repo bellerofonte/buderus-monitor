@@ -40,7 +40,7 @@
     },
     "dependencies": {
         "serialport": "^9.0.1",
-        "axios": "^0.20.0",
+        "axios": "^0.21.1",
         "events": "^3.2.0",
         "express": "^4.17.1",
         "express-ipfilter": "^1.1.2",
